@@ -12,18 +12,18 @@ userRoute.get('/user', (req, res) => {
 })
 
 userRoute.post('/register', async (req, res) => {
-    const { name, email, pass } = req.body
+    const { email, firstname, lastname, password, role, registerdate, avatar, gender, mobile } = req.body
 
     try {
         const user = await userModel.find({ email })
         if (user.length > 0) {
             res.send({ "msg": "Already have an account please login" })
         } else {
-            bcrypt.hash(pass, 9, async (err, hash) => {
+            bcrypt.hash(password, 9, async (err, hash) => {
                 if (err) {
                     res.send("Something went wrong")
                 } else {
-                    const user = new userModel({ name, email, pass: hash })
+                    const user = new userModel({ role, registerdate, avatar, gender, email, mobile, firstname, lastname, password: hash })
                     await user.save()
                     res.send({ "msg": "new user has been register", "success": true })
                 }
@@ -37,11 +37,11 @@ userRoute.post('/register', async (req, res) => {
 })
 
 userRoute.post('/login', async (req, res) => {
-    const { email, pass } = req.body
+    const { email, password } = req.body
     try {
         const user = await userModel.find({ email })
         if (user.length > 0) {
-            bcrypt.compare(pass, user[0].pass, (err, result) => {
+            bcrypt.compare(password, user[0].password, (err, result) => {
                 if (result) {
                     const token = jwt.sign({ userID: user[0]._id }, "manyavar")
                     res.send({ "msg": "Login sucessful", "success": true, token, user })
@@ -104,7 +104,6 @@ userRoute.patch('/edit/:_id', async (req, res) => {
         console.log(err)
     }
 })
-
 module.exports = {
     userRoute
 }
